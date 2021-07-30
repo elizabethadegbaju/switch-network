@@ -1,0 +1,35 @@
+---
+name: test-network-Bank${ORG}
+version: 1.0.0
+client:
+  organization: Bank${ORG}
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  Bank${ORG}:
+    mspid: Bank${ORG}MSP
+    peers:
+    - peer0.Bank${ORG}.appzone.com
+    certificateAuthorities:
+    - ca.Bank${ORG}.appzone.com
+peers:
+  peer0.Bank${ORG}.appzone.com:
+    url: grpcs://localhost:${P0PORT}
+    tlsCACerts:
+      pem: |
+          ${PEERPEM}
+    grpcOptions:
+      ssl-target-name-override: peer0.Bank${ORG}.appzone.com
+      hostnameOverride: peer0.Bank${ORG}.appzone.com
+certificateAuthorities:
+  ca.Bank${ORG}.appzone.com:
+    url: https://localhost:${CAPORT}
+    caName: ca-Bank${ORG}
+    tlsCACerts:
+      pem: 
+        - |
+          ${CAPEM}
+    httpOptions:
+      verify: false

@@ -1,0 +1,187 @@
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+
+    ID: OrdererMSP
+
+    MSPDir: ../organizations/ordererOrganizations/appzone.com/configtx
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+
+    OrdererEndpoints:
+      - orderer.appzone.com:7050
+
+  - &BankOne
+    Name: BankOneMSP
+
+    ID: BankOneMSP
+
+    MSPDir: ../organizations/peerOrganizations/BankOne.appzone.com/configtx
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('BankOneMSP.admin', 'BankOneMSP.peer', 'BankOneMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('BankOneMSP.admin', 'BankOneMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('BankOneMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('BankOneMSP.peer')"
+
+  - &BankTwo
+    Name: BankTwoMSP
+
+    ID: BankTwoMSP
+
+    MSPDir: ../organizations/peerOrganizations/BankTwo.appzone.com/configtx
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('BankTwoMSP.admin', 'BankTwoMSP.peer', 'BankTwoMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('BankTwoMSP.admin', 'BankTwoMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('BankTwoMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('BankTwoMSP.peer')"
+
+  - &BankThree
+    Name: BankThreeMSP
+
+    ID: BankThreeMSP
+
+    MSPDir: ../organizations/peerOrganizations/BankThree.appzone.com/configtx
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('BankThreeMSP.admin', 'BankThreeMSP.peer', 'BankThreeMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('BankThreeMSP.admin', 'BankThreeMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('BankThreeMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('BankThreeMSP.peer')"
+
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+
+  Orderer: &OrdererCapabilities
+    V2_0: true
+
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.appzone.com:7050
+
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.appzone.com
+        Port: 7050
+        ClientTLSCert: ../organizations/ordererOrganizations/appzone.com/orderers/orderer.appzone.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/appzone.com/orderers/orderer.appzone.com/tls/server.crt
+
+  BatchTimeout: 2s
+
+  BatchSize:
+    MaxMessageCount: 10
+
+    AbsoluteMaxBytes: 99 MB
+
+    PreferredMaxBytes: 512 KB
+
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+
+  TwoOrgsApplicationGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities: *OrdererCapabilities
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *BankOne
+        - *BankTwo
+        - *BankThree
+      Capabilities: *ApplicationCapabilities
